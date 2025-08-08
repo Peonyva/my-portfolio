@@ -1,8 +1,3 @@
-/**
- * Portfolio Management System
- * ระบบจัดการข้อมูลส่วนตัวและประวัติการทำงาน
- */
-
 // ==================== GLOBAL VARIABLES ====================
 let allSkills = [];
 let selectedSkills = [];
@@ -11,16 +6,14 @@ let workExperienceCount = 1;
 let educationCount = 1;
 let projectCount = 1;
 let draggedElement = null;
-let draggedType = null; 
+let draggedType = null;
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', async function () {
     await initializeApp();
 });
 
-/**
- * เริ่มต้นระบบหลังจากโหลดหน้าเว็บเสร็จ
- */
+/* เริ่มต้นระบบหลังจากโหลดหน้าเว็บเสร็จ */
 async function initializeApp() {
     try {
         await loadSkillsFromServer();
@@ -35,11 +28,8 @@ async function initializeApp() {
     }
 }
 
-/**
- * ตั้งค่า Event Listeners ต่างๆ
- */
+/* ตั้งค่า Event Listeners ต่างๆ */
 function setupEventListeners() {
-    // Main skill select
     const mainSkillSelect = document.getElementById('skillSelect');
     if (mainSkillSelect) {
         mainSkillSelect.addEventListener('change', handleMainSkillSelectChange);
@@ -77,7 +67,7 @@ function setupExistingItemsSortable() {
 async function loadSkillsFromServer() {
     try {
         const response = await fetch('get-skills.php');
-        
+
         if (!response.ok) {
             throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
         }
@@ -135,13 +125,13 @@ function populateSkillsDropdown() {
  */
 function populateProjectSkillsDropdown() {
     const projectSelects = document.querySelectorAll('.project-skill-select');
-    
+
     projectSelects.forEach(select => {
         const projectIndex = parseInt(select.dataset.project);
         const projectSelectedSkills = projectSkills[projectIndex] || [];
 
         select.innerHTML = '<option value="">Choose a skill...</option>';
-        
+
         allSkills.forEach(skill => {
             const skillId = parseInt(skill.id);
             if (!projectSelectedSkills.includes(skillId)) {
@@ -246,7 +236,7 @@ function updateSelectedSkillsInput() {
 function addProjectSkill(projectIndex) {
     const parsedProjectIndex = parseInt(projectIndex);
     const select = document.querySelector(`.project-skill-select[data-project="${parsedProjectIndex}"]`);
-    
+
     if (!select) {
         console.error(`Project skill select not found for project ${parsedProjectIndex}`);
         return;
@@ -313,7 +303,7 @@ function updateProjectSkillsDisplay(projectIndex) {
                 const skill = allSkills.find(s => parseInt(s.id) === parsedSkillId);
                 if (skill) {
                     const skillTag = createSkillTag(
-                        skill, 
+                        skill,
                         `removeProjectSkill(${parsedProjectIndex}, ${parsedSkillId})`
                     );
                     skillsList.appendChild(skillTag);
@@ -351,9 +341,7 @@ function createSkillTag(skill, onClickAction) {
 
 // ==================== EVENT HANDLERS ====================
 
-/**
- * จัดการการเปลี่ยนแปลงของ main skill select
- */
+/* จัดการการเปลี่ยนแปลงของ main skill select */
 function handleMainSkillSelectChange(event) {
     const addBtn = document.getElementById('addSkillBtn');
     if (addBtn) {
@@ -362,9 +350,7 @@ function handleMainSkillSelectChange(event) {
     }
 }
 
-/**
- * จัดการการเปลี่ยนแปลงของ project skill select
- */
+/* จัดการการเปลี่ยนแปลงของ project skill select */
 function handleProjectSkillSelectChange(event) {
     if (event.target.classList.contains('project-skill-select')) {
         const projectIndex = parseInt(event.target.dataset.project);
@@ -674,17 +660,17 @@ function createWorkExperienceItem(index) {
         <div class="grid grid-cols-2">
             <div class="form-group">
                 <label class="form-label">Company Name *</label>
-                <input type="text" name="work_experience[${index}][company_name]" class="form-input" required>
+                <input type="text" name="workExperience[${index}][companyName]" class="form-input" required>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Position *</label>
-                <input type="text" name="work_experience[${index}][position]" class="form-input" required>
+                <input type="text" name="workExperience[${index}][position]" class="form-input" required>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Employment Type</label>
-                <select name="work_experience[${index}][employee_type]" class="form-select">
+                <select name="workExperience[${index}][employeeType]" class="form-select">
                     <option value="Full-time">Full-time</option>
                     <option value="Part-time">Part-time</option>
                     <option value="Contract">Contract</option>
@@ -697,19 +683,26 @@ function createWorkExperienceItem(index) {
                 <div class="grid grid-cols-2">
                     <div class="form-group">
                         <label class="form-label">Start Date</label>
-                        <input type="date" name="work_experience[${index}][start_date]" class="form-input">
+                        <input type="date" name="work_experience[${index}][startDate]" class="form-input">
                     </div>
                     <div class="form-group">
                         <label class="form-label">End Date</label>
-                        <input type="date" name="work_experience[${index}][end_date]" class="form-input">
+                        <input type="date" name="work_experience[${index}][endDate]" class="form-input">
                     </div>
                 </div>
             </div>
             
             <div class="form-group col-span-2">
                 <label class="form-label">Job Description</label>
-                <textarea name="work_experience[${index}][position_description]" class="form-textarea" rows="3"></textarea>
+                <textarea name="workExperience[${index}][positionDescription]" class="form-textarea" rows="3"></textarea>
             </div>
+            <div class="form-group col-span-2">
+                <label class="form-label">Remark</label>
+                <textarea name="workExperience[${index}][workExperienceRemarks]" class="form-textarea" rows="3"></textarea>
+            </div>
+
+
+
         </div>
     `;
     return item;
@@ -759,7 +752,7 @@ function createEducationItem(index) {
         <div class="grid grid-cols-2">
             <div class="form-group">
                 <label class="form-label">Institution Name *</label>
-                <input type="text" name="education[${index}][education_name]" class="form-input" required>
+                <input type="text" name="education[${index}][educationName]" class="form-input" required>
             </div>
             
             <div class="form-group">
@@ -769,25 +762,30 @@ function createEducationItem(index) {
             
             <div class="form-group">
                 <label class="form-label">Faculty/School</label>
-                <input type="text" name="education[${index}][faculty_name]" class="form-input">
+                <input type="text" name="education[${index}][facultyName]" class="form-input">
             </div>
             
             <div class="form-group">
                 <label class="form-label">Major/Field of Study</label>
-                <input type="text" name="education[${index}][major_name]" class="form-input">
+                <input type="text" name="education[${index}][majorName]" class="form-input">
             </div>
             
             <div class="form-group col-span-2">
                 <div class="grid grid-cols-2">
                     <div class="form-group">
                         <label class="form-label">Start Date</label>
-                        <input type="date" name="education[${index}][start_date]" class="form-input">
+                        <input type="date" name="education[${index}][startDate]" class="form-input">
                     </div>
                     <div class="form-group">
                         <label class="form-label">End Date</label>
-                        <input type="date" name="education[${index}][end_date]" class="form-input">
+                        <input type="date" name="education[${index}][endDate]" class="form-input">
                     </div>
                 </div>
+            </div>
+
+               <div class="form-group col-span-2">
+                <label class="form-label">Remark</label>
+                <textarea name="education[${index}][educationRemarks]" class="form-textarea" rows="3"></textarea>
             </div>
         </div>
     `;
@@ -838,7 +836,7 @@ function createProjectItem(index) {
         
         <div class="form-group">
             <label class="form-label">Project Title *</label>
-            <input type="text" name="projects[${index}][project_title]" class="form-input" required>
+            <input type="text" name="projects[${index}][projectTitle]" class="form-input" required>
         </div>
         
         <div class="form-group">
@@ -854,12 +852,12 @@ function createProjectItem(index) {
                     <p style="font-size: 12px; color: #6b7280;">PNG, JPG, GIF up to 10MB</p>
                 </div>
             </div>
-            <input type="file" id="projectImage_${index}" name="projects[${index}][project_image]" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'projectImageUploader_${index}')">
+            <input type="file" id="projectImage_${index}" name="projects[${index}][projectImage]" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'projectImageUploader_${index}')">
         </div>
         
         <div class="form-group">
             <label class="form-label">Key Points/Description</label>
-            <textarea name="projects[${index}][key_point]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..."></textarea>
+            <textarea name="projects[${index}][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..."></textarea>
         </div>
         
         <div class="skills">
@@ -1156,10 +1154,10 @@ function isValidLength(text, minLength = 0, maxLength = Infinity) {
  */
 function isValidImageFile(file) {
     if (!file) return false;
-    
+
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
     const maxSize = 10 * 1024 * 1024; // 10MB
-    
+
     return validTypes.includes(file.type) && file.size <= maxSize;
 }
 
@@ -1177,10 +1175,10 @@ function isValidDate(dateString) {
  */
 function isValidDateRange(startDate, endDate) {
     if (!startDate || !endDate) return true; // อนุญาตให้เป็นค่าว่างได้
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     return start <= end;
 }
 
@@ -1194,13 +1192,13 @@ if (typeof module !== 'undefined' && module.exports) {
         removeSkill,
         addProjectSkill,
         removeProjectSkill,
-        
+
         // Utility functions
         isValidArray,
         parseIntSafely,
         findSkillById,
         isSkillSelected,
-        
+
         // Validation functions
         isValidEmail,
         isValidPhoneNumber,
