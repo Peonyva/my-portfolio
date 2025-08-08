@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 try {
     // เริ่มต้น database transaction
-    $pdo->beginTransaction();
-    
+    $conn->beginTransaction();
+
     // รับข้อมูลจากฟอร์ม
     $personalData = getPersonalInformation();
     $skills = getSelectedSkills();
