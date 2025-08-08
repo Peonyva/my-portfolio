@@ -124,8 +124,8 @@ function getSelectedSkills() {
     if (empty($skillsString)) {
         return [];
     }
-    $skillIds = explode(',', $skillsString);
-    return array_map('intval', array_filter($skillIds));
+    $skillsIDs = explode(',', $skillsString);
+    return array_map('intval', array_filter($skillsIDs));
 }
 
 function getWorkExperiences() {
@@ -208,8 +208,8 @@ function getProjects($userId) {
 
             $projectSkills = [];
             if (!empty($project['skills'])) {
-                $skillIds = explode(',', $project['skills']);
-                $projectSkills = array_map('intval', array_filter($skillIds));
+                $skillsIDs = explode(',', $project['skills']);
+                $projectSkills = array_map('intval', array_filter($skillsIDs));
             }
 
             $projects[] = [
@@ -286,8 +286,8 @@ function insertUserSkills($conn, $userId, $skills) {
     $sql = "INSERT INTO profileSkills (userID, skillsID) VALUES (?, ?)";
     $stmt = $conn->prepare($sql);
 
-    foreach ($skills as $skillId) {
-        $stmt->execute([$userId, $skillId]);
+    foreach ($skills as $skillsID) {
+        $stmt->execute([$userId, $skillsID]);
     }
 }
 
@@ -360,8 +360,8 @@ function insertProjects($conn, $userId, $projects) {
         $projectId = $conn->lastInsertId();
 
         if (!empty($project['skills'])) {
-            foreach ($project['skills'] as $skillId) {
-                $projectSkillStmt->execute([$projectId, $skillId]);
+            foreach ($project['skills'] as $skillsID) {
+                $projectSkillStmt->execute([$projectId, $skillsID]);
             }
         }
     }
