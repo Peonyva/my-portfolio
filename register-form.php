@@ -198,7 +198,7 @@
               </div>
               <div class="form-group col-span-2">
                 <label class="form-label">Remark</label>
-                <textarea name="workExperience[0][workExperience-remarks]" class="form-textarea" rows="3"></textarea>
+                <textarea name="workExperience[0][workExperienceRemarks]" class="form-textarea" rows="3"></textarea>
               </div>
             </div>
           </div>
@@ -258,7 +258,7 @@
               </div>
               <div class="form-group col-span-2">
                 <label class="form-label">Remark</label>
-                <textarea name="education[0][education_remarks]" class="form-textarea" rows="3"></textarea>
+                <textarea name="education[0][educationRemarks]" class="form-textarea" rows="3"></textarea>
               </div>
             </div>
           </div>
