@@ -1,4 +1,4 @@
-<?php require 'config.php'?>
+<?php require_once 'config.php'?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +9,6 @@
   <title>My Portfolio</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <link rel="stylesheet" href="styles/index.css" />
-
 </head>
 
 <body>
@@ -18,7 +17,7 @@
     <div class="container">
       <nav class="nav-container">
         <div class="logo">
-          <img src="assets/logo3.jpg" alt="Logo">My Portfolio
+          <img src="assets/logo3.jpg" alt="Logo" />My Portfolio
         </div>
         <ul class="nav-menu" id="nav-menu">
           <li><a href="#aboutme" class="nav-link active">About Me</a></li>
@@ -40,7 +39,7 @@
   <div class="container">
     <section class="hero" id="aboutme">
       <div class="cover-photo">
-          <img src="assets/cover_image.jpg" alt="Cover Photo">
+          <img src="assets/cover_image.jpg" alt="Cover Photo" />
       </div>
 
       <!-- Profile -->
@@ -103,7 +102,7 @@
           <!-- html -->
           <div class="skill-item">
             <div class="skill-icon">
-              <i class="fab fa-html5 skill-icon icon-html"></i>
+              <i class="fab fa-html5 skill-icon icon-html"></i> 
             </div>
             <div class="skill-name">HTML</div>
           </div>

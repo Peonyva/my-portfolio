@@ -190,7 +190,7 @@ body {
   /* ===============================
     Hero
   =============================== */
-
+/* block ที่ครอบคลุม cover*/
 .hero {
     position: relative;
     margin-top: 70px;
