@@ -369,8 +369,8 @@ async function handleFormSubmission(event) {
     event.preventDefault();
 
     try {
-        // แสดง loading
-        await Swal.fire({
+        // แสดง loading (ไม่ await)
+        Swal.fire({
             title: 'กำลังบันทึกข้อมูล...',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
@@ -383,6 +383,7 @@ async function handleFormSubmission(event) {
         });
 
         const result = await response.json();
+
         Swal.close();
 
         if (result.success) {

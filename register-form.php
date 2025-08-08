@@ -9,7 +9,6 @@
   <title>Register</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="scripts/register.js"></script>
   <link rel="stylesheet" href="styles/register.css" />
 </head>
 
@@ -347,7 +346,7 @@
       </div>
     </form>
   </div>
-
+  <script src="scripts/register.js"></script>
 </body>
 
 </html>
