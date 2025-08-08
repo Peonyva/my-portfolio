@@ -377,7 +377,7 @@ async function handleFormSubmission(event) {
         });
 
         const formData = new FormData(event.target);
-        const response = await fetch('process_portfolio.php', {
+        const response = await fetch('insert.php', {
             method: 'POST',
             body: formData
         });
