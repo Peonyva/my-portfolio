@@ -342,7 +342,7 @@ function insertProjects($conn, $userId, $projects) {
         userID, projectTitle, projectImage, keyPoint
     ) VALUES (?, ?, ?, ?)";
 
-    $projectSkillSql = "INSERT INTO projectSkills (
+    $projectSkillSql = "INSERT INTO projectskills (
         projectID, skillsID
     ) VALUES (?, ?)";
 
