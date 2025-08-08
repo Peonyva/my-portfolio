@@ -306,7 +306,7 @@
 
             <div class="form-group">
               <label class="form-label">Project Description</label>
-              <textarea name="projects[${index}][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..."></textarea>
+              <textarea name="projects[0][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..."></textarea>
             </div>
 
             <div class="skills">
