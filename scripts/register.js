@@ -683,11 +683,11 @@ function createWorkExperienceItem(index) {
                 <div class="grid grid-cols-2">
                     <div class="form-group">
                         <label class="form-label">Start Date</label>
-                        <input type="date" name="work_experience[${index}][startDate]" class="form-input">
+                        <input type="date" name="workExperience[${index}][startDate]" class="form-input">
                     </div>
                     <div class="form-group">
                         <label class="form-label">End Date</label>
-                        <input type="date" name="work_experience[${index}][endDate]" class="form-input">
+                        <input type="date" name="workExperience[${index}][endDate]" class="form-input">
                     </div>
                 </div>
             </div>
