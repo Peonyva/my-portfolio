@@ -20,7 +20,7 @@
       <p>Fill out your information to create your professional portfolio</p>
     </div>
 
-    <form id="portfolioForm" method="POST" action="#" enctype="multipart/form-data">
+    <form id="portfolioForm" method="POST" action="insert.php" enctype="multipart/form-data">
       <!-- Personal Information Section -->
       <section>
         <h2 class="title">
