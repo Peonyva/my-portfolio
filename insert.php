@@ -113,7 +113,7 @@ function updatePersonalImages($conn, $userId, $images) {
 
     if (!empty($updates)) {
         $params[] = $userId;
-        $sql = "UPDATE profile SET " . implode(', ', $updates) . " WHERE id = ?";
+        $sql = "UPDATE profile SET " . implode(', ', $updates) . " WHERE UserID = ?";
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
     }
