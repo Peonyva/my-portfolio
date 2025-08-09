@@ -822,7 +822,7 @@ function validateDateRangeInContainer(container) {
             }
 
             showError('Invalid',
-                `Start date of...${sectionName}Must be before the end date.`);
+                `Start date of ${sectionName}Must be before the end date.`);
 
             // เน้นสี input ที่มีปัญหา
             startDateInput.style.borderColor = '#ef4444';
