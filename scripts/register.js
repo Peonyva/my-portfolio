@@ -24,7 +24,7 @@ async function initializeApp() {
         console.log('Application initialized successfully');
     } catch (error) {
         console.error('Failed to initialize application:', error);
-        await showError('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูล skills ได้ กรุณาลองใหม่');
+        await showError('An error occurred', 'Unable to load skills data. Please try again.');
     }
 }
 
@@ -41,16 +41,18 @@ function setupEventListeners() {
     // Sortable containers
     setupSortableEventListeners();
 
+    // Date Validation
+    setupDateValidation();
+
     // Form submission
     const portfolioForm = document.getElementById('portfolioForm');
     if (portfolioForm) {
         portfolioForm.addEventListener('submit', handleFormSubmission);
     }
+
 }
 
-/**
- * ทำให้ existing items เป็น sortable หลังจากโหลดเสร็จ
- */
+/* ทำให้ existing items เป็น sortable หลังจากโหลดเสร็จ */
 function setupExistingItemsSortable() {
     setTimeout(() => {
         document.querySelectorAll('.work-item').forEach(item => makeSortableItem(item, 'work'));
@@ -61,9 +63,7 @@ function setupExistingItemsSortable() {
 
 // ==================== SKILLS MANAGEMENT ====================
 
-/**
- * โหลดข้อมูล skills จาก server
- */
+/* โหลดข้อมูล skills จาก server */
 async function loadSkillsFromServer() {
     try {
         const response = await fetch('get-skills.php');
@@ -88,15 +88,13 @@ async function loadSkillsFromServer() {
 
     } catch (error) {
         console.error("Failed to load skills from server:", error);
-        await showError('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลสกิลได้: ${error.message}`);
+        await showError('An error occurred.', `Unable to load skills data. Please try again.: ${error.message}`);
         allSkills = [];
         throw error;
     }
 }
 
-/**
- * เติมข้อมูลใน main skills dropdown
- */
+/* เติมข้อมูลใน main skills dropdown */
 function populateSkillsDropdown() {
     const skillSelect = document.getElementById('skillSelect');
     if (!skillSelect) return;
@@ -120,9 +118,7 @@ function populateSkillsDropdown() {
     }
 }
 
-/**
- * เติมข้อมูลใน project skills dropdown
- */
+/* เติมข้อมูลใน project skills dropdown */
 function populateProjectSkillsDropdown() {
     const projectSelects = document.querySelectorAll('.project-skill-select');
 
@@ -150,9 +146,7 @@ function populateProjectSkillsDropdown() {
     });
 }
 
-/**
- * เพิ่ม skill หลัก
- */
+/* เพิ่ม skill หลัก */
 function addSkill() {
     const skillSelect = document.getElementById('skillSelect');
     if (!skillSelect) {
@@ -175,9 +169,7 @@ function addSkill() {
     }
 }
 
-/**
- * ลบ skill หลัก
- */
+/* ลบ skill หลัก */
 function removeSkill(skillId) {
     const parsedSkillId = parseInt(skillId);
     selectedSkills = selectedSkills.filter(id => parseInt(id) !== parsedSkillId);
@@ -187,9 +179,7 @@ function removeSkill(skillId) {
     updateSelectedSkillsInput();
 }
 
-/**
- * อัพเดทการแสดงผล skills หลัก
- */
+/* อัพเดทการแสดงผล skills หลัก */
 function updateSkillsDisplay() {
     const container = document.getElementById('selectedSkillsContainer');
     const emptyState = document.getElementById('emptySkillsState');
@@ -218,9 +208,7 @@ function updateSkillsDisplay() {
     }
 }
 
-/**
- * อัพเดท hidden input สำหรับ selected skills
- */
+/* อัพเดท hidden input สำหรับ selected skills */
 function updateSelectedSkillsInput() {
     const selectedSkillsInput = document.getElementById('selectedSkillsInput');
     if (selectedSkillsInput) {
@@ -230,9 +218,7 @@ function updateSelectedSkillsInput() {
 
 // ==================== PROJECT SKILLS MANAGEMENT ====================
 
-/**
- * เพิ่ม skill สำหรับ project
- */
+/* เพิ่ม skill สำหรับ project */
 function addProjectSkill(projectIndex) {
     const parsedProjectIndex = parseInt(projectIndex);
     const select = document.querySelector(`.project-skill-select[data-project="${parsedProjectIndex}"]`);
@@ -260,9 +246,7 @@ function addProjectSkill(projectIndex) {
     }
 }
 
-/**
- * ลบ skill จาก project
- */
+/* ลบ skill จาก project */
 function removeProjectSkill(projectIndex, skillId) {
     const parsedProjectIndex = parseInt(projectIndex);
     const parsedSkillId = parseInt(skillId);
@@ -276,9 +260,7 @@ function removeProjectSkill(projectIndex, skillId) {
     }
 }
 
-/**
- * อัพเดทการแสดงผล skills ของ project
- */
+/* อัพเดทการแสดงผล skills ของ project */
 function updateProjectSkillsDisplay(projectIndex) {
     const parsedProjectIndex = parseInt(projectIndex);
     const container = document.querySelector(`.project-skills-container[data-project="${parsedProjectIndex}"]`);
@@ -316,19 +298,15 @@ function updateProjectSkillsDisplay(projectIndex) {
     }
 }
 
-/**
- * อัพเดท hidden input สำหรับ project skills
- */
+/* อัพเดท hidden input สำหรับ project skills */
 function updateProjectSkillsInput(projectIndex) {
     const input = document.querySelector(`input[name="projects[${projectIndex}][skills]"]`);
-    if (input) {
+    if (input && projectSkills[projectIndex]) {
         input.value = projectSkills[projectIndex].join(',');
     }
 }
 
-/**
- * สร้าง skill tag element
- */
+/* สร้าง skill tag element */
 function createSkillTag(skill, onClickAction) {
     const skillTag = document.createElement('div');
     skillTag.className = 'skill-tag';
@@ -362,65 +340,209 @@ function handleProjectSkillSelectChange(event) {
     }
 }
 
-/**
- * จัดการการส่งฟอร์ม
- */
+/* จัดการการส่งฟอร์ม */
 async function handleFormSubmission(event) {
     event.preventDefault();
 
     try {
-        // แสดง loading (ไม่ await)
+        // ตรวจสอบก่อนส่งข้อมูล
+        if (!validateFormBeforeSubmit()) {
+            return; // ถ้าตรวจสอบไม่ผ่านให้หยุด
+        }
+
+        // แสดง loading
         Swal.fire({
-            title: 'กำลังบันทึกข้อมูล...',
+            title: 'Saving data...',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
         });
 
         const formData = new FormData(event.target);
+
+        // Debug: แสดงข้อมูลที่จะส่ง
+        console.log('Form data being sent:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+
         const response = await fetch('insert.php', {
             method: 'POST',
             body: formData
         });
 
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            // ถ้า response ไม่ใช่ JSON ให้ใช้ text
+            const textResult = await response.text();
+            console.error('Invalid JSON response:', textResult);
+            throw new Error('Server returned invalid response');
+        }
 
         Swal.close();
 
         if (result.success) {
-            await showSuccess('สำเร็จ!', result.message);
-            // window.location.href = 'success.php';
+            await showSuccess('Success!', result.message || 'Data saved successfully.');
+            // เปลี่ยนเส้นทางหลังจากบันทึกสำเร็จ
+            if (result.userId) {
+                // window.location.href = `portfolio.php?id=${result.userId}`;
+                console.log('Portfolio created with ID:', result.userId);
+            }
         } else {
-            await showError('เกิดข้อผิดพลาด', result.message);
+            await showError('An error occurred.', result.message || 'Unable to save data.');
         }
 
     } catch (error) {
         console.error('Form submission error:', error);
         Swal.close();
-        await showError('เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+        await showError('An error occurred.', 'Unable to send data. Please check your internet connection.');
     }
 }
 
-// ==================== IMAGE HANDLING ====================
+/* ตรวจสอบข้อมูลก่อนส่งฟอร์ม*/
+function validateFormBeforeSubmit() {
+    // ตรวจสอบรูปภาพที่จำเป็น
+    const requiredImages = [
+        { id: 'myImage', name: 'Profile Image' },
+        { id: 'coverImage', name: 'Cover IMage' }
+    ];
+
+    for (let image of requiredImages) {
+        const fileInput = document.getElementById(image.id);
+        if (!fileInput || !fileInput.files.length) {
+            showError('Missing information.', `Please upload${image.name}`);
+            // เลื่อนไปที่ input ที่ขาด
+            if (fileInput) {
+                fileInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
+        }
+    }
+
+    // ตรวจสอบรูปภาพ project
+    const projectItems = document.querySelectorAll('.project-item');
+    for (let i = 0; i < projectItems.length; i++) {
+        const item = projectItems[i];
+        const titleInput = item.querySelector(`input[name*="[projectTitle]"]`);
+        const imageInput = item.querySelector(`input[name*="[projectImage]"]`);
+
+        if (titleInput && titleInput.value.trim()) {
+            if (!imageInput || !imageInput.files.length) {
+                showError('Missing information.',
+                    `Please upload images for the project: ${titleInput.value}`);
+
+                // เลื่อนไปที่ project item ที่มีปัญหา
+                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+        }
+    }
+
+    // ตรวจสอบ date ranges ทั้งหมด
+    const dateErrors = validateAllDateRanges();
+    if (dateErrors.length > 0) {
+        showError('Invalid date', dateErrors[0]); // แสดงข้อผิดพลาดแรก
+        return false;
+    }
+
+    // ตรวจสอบข้อมูลพื้นฐาน
+    const requiredFields = [
+        { name: 'firstName', label: 'First Name' },
+        { name: 'lastName', label: 'Last Name' },
+        { name: 'position', label: 'Professional Title' },
+        { name: 'email', label: 'Email' },
+        { name: 'phone', label: 'Phone' },
+        { name: 'introContent', label: 'About Me' }
+    ];
+
+    for (let field of requiredFields) {
+        const input = document.querySelector(`[name="${field.name}"]`);
+        if (!input || !input.value.trim()) {
+            showError('Missing information', `Please Fill${field.label}`);
+            if (input) {
+                input.focus();
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
+        }
+    }
+
+    // ตรวจสอบ email format
+    const emailInput = document.querySelector('[name="email"]');
+    if (emailInput && !isValidEmail(emailInput.value)) {
+        showError('Invalid data', 'Please enter a valid email address');
+        emailInput.focus();
+        return false;
+    }
+
+    return true; // ผ่านการตรวจสอบทั้งหมด
+}
 
 /**
- * จัดการการอัพโหลดรูปภาพ
+ * ตรวจสอบ date ranges ทั้งหมดในฟอร์ม
  */
+function validateAllDateRanges() {
+    const errors = [];
+
+    // ตรวจสอบ work experience
+    const workItems = document.querySelectorAll('.work-item');
+    workItems.forEach((item, index) => {
+        const startDate = item.querySelector('input[name*="[startDate]"]');
+        const endDate = item.querySelector('input[name*="[endDate]"]');
+
+        if (startDate && endDate && startDate.value && endDate.value) {
+            if (!isValidDateRange(startDate.value, endDate.value)) {
+                errors.push(`Start date for work experience entry # ${index + 1} Must be before the end date.`);
+            }
+        }
+    });
+
+    // ตรวจสอบ education
+    const educationItems = document.querySelectorAll('.education-item');
+    educationItems.forEach((item, index) => {
+        const startDate = item.querySelector('input[name*="[startDate]"]');
+        const endDate = item.querySelector('input[name*="[endDate]"]');
+
+        if (startDate && endDate && startDate.value && endDate.value) {
+            if (!isValidDateRange(startDate.value, endDate.value)) {
+                errors.push(`Start date for Education entry # ${index + 1} Must be before the end date.`);
+            }
+        }
+    });
+
+    return errors;
+}
+
+
+// ==================== IMAGE HANDLING ====================
+
+/* จัดการการอัพโหลดรูปภาพ */
 function handleImageUpload(input, uploaderId) {
     const uploader = document.getElementById(uploaderId);
     const file = input.files[0];
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            uploader.innerHTML = createImagePreviewHTML(e.target.result, input.id, uploaderId);
-        };
-        reader.readAsDataURL(file);
+    if (!file) return;
+
+    // ตรวจสอบประเภทและขนาดไฟล์
+    if (!isValidImageFile(file)) {
+        showError('Invalid file', 'Please select an image file (JPG, PNG, GIF) no larger than 10 MB.');
+        input.value = ''; // ล้างการเลือกไฟล์
+        return;
     }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        uploader.innerHTML = createImagePreviewHTML(e.target.result, input.id, uploaderId, file.name);
+    };
+    reader.onerror = function () {
+        showError('An error occurred.', 'Cannot read file.');
+        input.value = '';
+    };
+    reader.readAsDataURL(file);
 }
 
-/**
- * ลบรูปภาพ
- */
+/* ลบรูปภาพ */
 function removeImage(uploaderId, inputId) {
     const uploader = document.getElementById(uploaderId);
     const input = document.getElementById(inputId);
@@ -434,10 +556,11 @@ function removeImage(uploaderId, inputId) {
 /**
  * สร้าง HTML สำหรับแสดงตัวอย่างรูปภาพ
  */
-function createImagePreviewHTML(imageSrc, inputId, uploaderId) {
+function createImagePreviewHTML(imageSrc, inputId, uploaderId, fileName = '') {
     return `
         <div class="image-preview">
-            <img src="${imageSrc}" alt="Preview" style="max-height: 160px; border-radius: 8px; object-fit: cover;">
+            <img src="${imageSrc}" alt="Preview" style="max-width: 100%; max-height: 160px; border-radius: 8px; object-fit: cover;">
+            ${fileName ? `<p style="font-size: 12px; color: #666; margin-top: 8px; word-break: break-all;">${fileName}</p>` : ''}
         </div>
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 12px;">
             <button type="button" class="btn btn-primary" onclick="document.getElementById('${inputId}').click()">
@@ -450,9 +573,7 @@ function createImagePreviewHTML(imageSrc, inputId, uploaderId) {
     `;
 }
 
-/**
- * สร้าง HTML สำหรับ image uploader
- */
+/* สร้าง HTML สำหรับ image uploader */
 function createImageUploaderHTML(inputId) {
     return `
         <div class="upload-placeholder">
@@ -466,21 +587,16 @@ function createImageUploaderHTML(inputId) {
         </div>
     `;
 }
-
 // ==================== DRAG & DROP FUNCTIONALITY ====================
 
-/**
- * ตั้งค่า Sortable Event Listeners
- */
+/* ตั้งค่า Sortable Event Listeners */
 function setupSortableEventListeners() {
     setupContainerSortable('workExperienceContainer', 'work-item', 'work');
     setupContainerSortable('educationContainer', 'education-item', 'education');
     setupContainerSortable('projectsContainer', 'project-item', 'project');
 }
 
-/**
- * ตั้งค่า Sortable สำหรับ Container
- */
+/*  ตั้งค่า Sortable สำหรับ Container */
 function setupContainerSortable(containerId, itemClass, type) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -489,9 +605,7 @@ function setupContainerSortable(containerId, itemClass, type) {
     container.addEventListener('drop', (e) => handleDrop(e, type));
 }
 
-/**
- * ทำให้ item สามารถ drag and drop ได้
- */
+/* ทำให้ item สามารถ drag and drop ได้ */
 function makeSortableItem(element, type) {
     const itemHeader = element.querySelector('.item-header');
     if (!itemHeader) return;
@@ -509,9 +623,8 @@ function makeSortableItem(element, type) {
     element.addEventListener('dragleave', handleDragLeave);
 }
 
-/**
- * สร้าง drag handle
- */
+
+/* สร้าง drag handle */
 function createDragHandle() {
     const dragHandle = document.createElement('div');
     dragHandle.className = 'drag-handle';
@@ -587,9 +700,7 @@ function handleDragLeave(e) {
     }
 }
 
-/**
- * หา element ที่ควรจะ insert ก่อน
- */
+/* หา element ที่ควรจะ insert ก่อน */
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
 
@@ -625,14 +736,124 @@ function updateItemNumbers(type) {
             title.textContent = `${config.prefix} #${index + 1}`;
         }
         item.dataset.index = index;
+
+        // อัพเดท name attributes สำหรับ form fields
+        updateItemFormFields(item, index, type);
+    });
+}
+
+/**
+ * อัพเดท form field names หลังจาก reorder
+ */
+function updateItemFormFields(item, newIndex, type) {
+    const fieldMappings = {
+        work: 'workExperience',
+        education: 'education',
+        project: 'projects'
+    };
+
+    const fieldName = fieldMappings[type];
+    if (!fieldName) return;
+
+    // อัพเดท input, select, และ textarea ทั้งหมดใน item
+    const formElements = item.querySelectorAll('input, select, textarea');
+    formElements.forEach(element => {
+        const currentName = element.getAttribute('name');
+        if (currentName && currentName.includes(`[${fieldName}][`)) {
+            // แทนที่ index เก่าด้วย index ใหม่
+            const newName = currentName.replace(
+                new RegExp(`${fieldName}\\[\\d+\\]`),
+                `${fieldName}[${newIndex}]`
+            );
+            element.setAttribute('name', newName);
+        }
+    });
+
+    // อัพเดท id และ onclick attributes สำหรับ project images
+    if (type === 'project') {
+        const imageInput = item.querySelector('input[type="file"]');
+        const imageUploader = item.querySelector('.image-uploader');
+
+        if (imageInput) {
+            imageInput.id = `projectImage_${newIndex}`;
+        }
+
+        if (imageUploader) {
+            imageUploader.id = `projectImageUploader_${newIndex}`;
+        }
+
+        // อัพเดท project skill select
+        const skillSelect = item.querySelector('.project-skill-select');
+        if (skillSelect) {
+            skillSelect.dataset.project = newIndex;
+        }
+
+        // อัพเดท project skills containers
+        const skillsContainer = item.querySelector('.project-skills-container');
+        const skillsEmpty = item.querySelector('.project-skills-empty');
+
+        if (skillsContainer) skillsContainer.dataset.project = newIndex;
+        if (skillsEmpty) skillsEmpty.dataset.project = newIndex;
+    }
+}
+
+
+// ==================== DATE FUNCTIONALITY ====================
+/**
+ * ตรวจสอบ date range ใน container
+ */
+function validateDateRangeInContainer(container) {
+    const startDateInput = container.querySelector('input[name*="[startDate]"]');
+    const endDateInput = container.querySelector('input[name*="[endDate]"]');
+
+    if (startDateInput && endDateInput && startDateInput.value && endDateInput.value) {
+        if (!isValidDate(startDateInput.value) || !isValidDate(endDateInput.value)) {
+            showError('Invalid date', 'Please enter a valid date.');
+            return false;
+        }
+
+        if (!isValidDateRange(startDateInput.value, endDateInput.value)) {
+            // กำหนด section name จาก container class
+            let sectionName = 'This item';
+            if (container.classList.contains('work-item')) {
+                sectionName = 'Work experience';
+            } else if (container.classList.contains('education-item')) {
+                sectionName = '"Education"';
+            }
+
+            showError('Invalid',
+                `Start date of...${sectionName}Must be before the end date.`);
+
+            // เน้นสี input ที่มีปัญหา
+            startDateInput.style.borderColor = '#ef4444';
+            endDateInput.style.borderColor = '#ef4444';
+
+            return false;
+        }
+    }
+    return true;
+}
+
+/* ตั้งค่า Date Validation */
+function setupDateValidation() {
+    document.addEventListener('change', function (e) {
+        if (e.target.type === 'date') {
+            // รีเซ็ตสีของ input
+            e.target.style.borderColor = '';
+
+            // หา container ที่เป็น parent ของ input นี้
+            const container = e.target.closest('.work-item, .education-item');
+            if (container) {
+                // ตรวจสอบ date range ใน container นี้
+                setTimeout(() => validateDateRangeInContainer(container), 100);
+            }
+        }
     });
 }
 
 // ==================== WORK EXPERIENCE MANAGEMENT ====================
 
-/**
- * เพิ่มประสบการณ์การทำงาน
- */
+/* เพิ่มประสบการณ์การทำงาน */
 function addWorkExperience() {
     const container = document.getElementById('workExperienceContainer');
     if (!container) return;
@@ -643,9 +864,7 @@ function addWorkExperience() {
     workExperienceCount++;
 }
 
-/**
- * สร้าง Work Experience Item
- */
+/* สร้าง Work Experience Item */
 function createWorkExperienceItem(index) {
     const item = document.createElement('div');
     item.className = 'work-item';
@@ -687,7 +906,7 @@ function createWorkExperienceItem(index) {
                         <input type="date" name="workExperience[${index}][startDate]" class="form-input">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">End Date</label>
+                        <label class="form-label">End Date <small>(Leave blank if current)</small></label>
                         <input type="date" name="workExperience[${index}][endDate]" class="form-input">
                     </div>
                 </div>
@@ -695,36 +914,32 @@ function createWorkExperienceItem(index) {
             
             <div class="form-group col-span-2">
                 <label class="form-label">Job Description</label>
-                <textarea name="workExperience[${index}][positionDescription]" class="form-textarea" rows="3"></textarea>
+                <textarea name="workExperience[${index}][positionDescription]" class="form-textarea" rows="3" placeholder="Describe your responsibilities and achievements..."></textarea>
             </div>
+            
             <div class="form-group col-span-2">
                 <label class="form-label">Remark</label>
-                <textarea name="workExperience[${index}][workExperienceRemarks]" class="form-textarea" rows="3"></textarea>
+                <textarea name="workExperience[${index}][workExperienceRemarks]" class="form-textarea" rows="2" placeholder="Additional notes (optional)..."></textarea>
             </div>
-
-
-
         </div>
     `;
     return item;
 }
 
-/**
- * ลบประสบการณ์การทำงาน
- */
+/* ลบประสบการณ์การทำงาน */
 function removeWorkExperience(index) {
     const parsedIndex = parseInt(index);
     const item = document.querySelector(`.work-item[data-index="${parsedIndex}"]`);
     if (item) {
         item.remove();
+        // อัพเดทหมายเลขของ items ที่เหลือ
+        updateItemNumbers('work');
     }
 }
 
 // ==================== EDUCATION MANAGEMENT ====================
 
-/**
- * เพิ่มข้อมูลการศึกษา
- */
+/* เพิ่มข้อมูลการศึกษา */
 function addEducation() {
     const container = document.getElementById('educationContainer');
     if (!container) return;
@@ -735,9 +950,7 @@ function addEducation() {
     educationCount++;
 }
 
-/**
- * สร้าง Education Item
- */
+/* สร้าง Education Item */
 function createEducationItem(index) {
     const item = document.createElement('div');
     item.className = 'education-item';
@@ -778,37 +991,34 @@ function createEducationItem(index) {
                         <input type="date" name="education[${index}][startDate]" class="form-input">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">End Date</label>
+                        <label class="form-label">End Date <small>(Leave blank if ongoing)</small></label>
                         <input type="date" name="education[${index}][endDate]" class="form-input">
                     </div>
                 </div>
             </div>
 
-               <div class="form-group col-span-2">
+            <div class="form-group col-span-2">
                 <label class="form-label">Remark</label>
-                <textarea name="education[${index}][educationRemarks]" class="form-textarea" rows="3"></textarea>
+                <textarea name="education[${index}][educationRemarks]" class="form-textarea" rows="2" placeholder="Additional notes, GPA, honors, etc. (optional)..."></textarea>
             </div>
         </div>
     `;
     return item;
 }
 
-/**
- * ลบข้อมูลการศึกษา
- */
+/* ลบข้อมูลการศึกษา */
 function removeEducation(index) {
     const parsedIndex = parseInt(index);
     const item = document.querySelector(`.education-item[data-index="${parsedIndex}"]`);
     if (item) {
         item.remove();
+        // อัพเดทหมายเลขของ items ที่เหลือ
+        updateItemNumbers('education');
     }
 }
 
 // ==================== PROJECT MANAGEMENT ====================
-
-/**
- * เพิ่มโปรเจค
- */
+/* เพิ่มโปรเจค */
 function addProject() {
     const container = document.getElementById('projectsContainer');
     if (!container) return;
@@ -820,9 +1030,7 @@ function addProject() {
     projectCount++;
 }
 
-/**
- * สร้าง Project Item
- */
+/* สร้าง Project Item */
 function createProjectItem(index) {
     const item = document.createElement('div');
     item.className = 'project-item';
@@ -841,7 +1049,7 @@ function createProjectItem(index) {
         </div>
         
         <div class="form-group">
-            <label class="form-label">Project Image</label>
+            <label class="form-label">Project Image *</label>
             <div class="image-uploader" id="projectImageUploader_${index}">
                 <div class="upload-placeholder">
                     <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -853,12 +1061,12 @@ function createProjectItem(index) {
                     <p style="font-size: 12px; color: #6b7280;">PNG, JPG, GIF up to 10MB</p>
                 </div>
             </div>
-            <input type="file" id="projectImage_${index}" name="projects[${index}][projectImage]" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'projectImageUploader_${index}')">
+            <input type="file" id="projectImage_${index}" name="projects[${index}][projectImage]" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'projectImageUploader_${index}')" required>
         </div>
         
         <div class="form-group">
             <label class="form-label">Key Points/Description</label>
-            <textarea name="projects[${index}][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..."></textarea>
+            <textarea name="projects[${index}][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, technologies used, and key achievements..."></textarea>
         </div>
         
         <div class="skills">
@@ -893,32 +1101,32 @@ function createProjectItem(index) {
     return item;
 }
 
-/**
- * ลบโปรเจค
- */
+/* ลบโปรเจค */
 function removeProject(index) {
     const parsedIndex = parseInt(index);
     const item = document.querySelector(`.project-item[data-index="${parsedIndex}"]`);
     if (item) {
         delete projectSkills[parsedIndex];
         item.remove();
+        // อัพเดทหมายเลขของ items ที่เหลือ
+        updateItemNumbers('project');
+        // อัพเดท dropdown ของ projects อื่น
+        populateProjectSkillsDropdown();
     }
 }
 
 // ==================== UTILITY FUNCTIONS ====================
 
-/**
- * แสดงข้อความแจ้งเตือนแบบ success
- */
+/* แสดงข้อความแจ้งเตือนแบบ success */
 async function showSuccess(title, text) {
     return await Swal.fire({
         icon: 'success',
         title: title,
         text: text,
-        confirmButtonText: 'ตกลง'
+        confirmButtonText: 'Confirmed',
+        confirmButtonColor: '#10b981'
     });
 }
-
 /**
  * แสดงข้อความแจ้งเตือนแบบ error
  */
@@ -927,194 +1135,34 @@ async function showError(title, text) {
         icon: 'error',
         title: title,
         text: text,
-        confirmButtonText: 'ตกลง'
+        confirmButtonText: 'Confirmed',
+        confirmButtonColor: '#ef4444'
     });
 }
 
-/**
- * แสดงข้อความแจ้งเตือนแบบ loading
- */
-async function showLoading(title = 'กำลังประมวลผล...') {
+/* แสดงข้อความแจ้งเตือนแบบ warning */
+async function showWarning(title, text) {
     return await Swal.fire({
+        icon: 'warning',
         title: title,
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
+        text: text,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#f59e0b'
     });
 }
 
-/**
- * ปิดข้อความแจ้งเตือน
- */
-function closeAlert() {
-    Swal.close();
-}
-
-/**
- * ตรวจสอบว่าข้อมูลใน array หรือไม่
- */
-function isValidArray(data) {
-    return Array.isArray(data) && data.length > 0;
-}
-
-/**
- * แปลงค่าเป็น integer และตรวจสอบความถูกต้อง
- */
-function parseIntSafely(value, defaultValue = 0) {
-    const parsed = parseInt(value);
-    return isNaN(parsed) ? defaultValue : parsed;
-}
-
-/**
- * ค้นหา skill จาก ID
- */
-function findSkillById(skillId) {
-    const parsedId = parseIntSafely(skillId);
-    return allSkills.find(skill => parseIntSafely(skill.id) === parsedId);
-}
-
-/**
- * ตรวจสอบว่า skill ถูกเลือกแล้วหรือไม่
- */
-function isSkillSelected(skillId, skillsArray = selectedSkills) {
-    const parsedId = parseIntSafely(skillId);
-    return skillsArray.includes(parsedId);
-}
-
-/**
- * ล้างข้อมูลใน form element
- */
-function clearFormElement(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.value = '';
-    }
-}
-
-/**
- * ตั้งค่าสถานะของ button
- */
-function setButtonState(buttonElement, disabled = true) {
-    if (buttonElement) {
-        buttonElement.disabled = disabled;
-    }
-}
-
-/**
- * ค้นหา element ด้วย selector และ dataset
- */
-function findElementWithDataset(selector, datasetKey, datasetValue) {
-    return document.querySelector(`${selector}[data-${datasetKey}="${datasetValue}"]`);
-}
-
-/**
- * อัพเดทข้อความใน element
- */
-function updateElementText(element, text) {
-    if (element) {
-        element.textContent = text;
-    }
-}
-
-/**
- * อัพเดท innerHTML ของ element
- */
-function updateElementHTML(element, html) {
-    if (element) {
-        element.innerHTML = html;
-    }
-}
-
-/**
- * แสดงหรือซ่อน element
- */
-function toggleElementVisibility(element, show = true) {
-    if (element) {
-        element.style.display = show ? 'block' : 'none';
-    }
-}
-
-/**
- * เพิ่มหรือลบ CSS class
- */
-function toggleClass(element, className, add = true) {
-    if (element) {
-        if (add) {
-            element.classList.add(className);
-        } else {
-            element.classList.remove(className);
-        }
-    }
-}
-
-/**
- * สร้าง option element สำหรับ select
- */
-function createOptionElement(value, text, selected = false) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = text;
-    option.selected = selected;
-    return option;
-}
-
-/**
- * ล้าง options ทั้งหมดใน select element
- */
-function clearSelectOptions(selectElement) {
-    if (selectElement) {
-        selectElement.innerHTML = '';
-    }
-}
-
-/**
- * เพิ่ม default option ใน select
- */
-function addDefaultOption(selectElement, text = 'Choose an option...') {
-    if (selectElement) {
-        const defaultOption = createOptionElement('', text);
-        selectElement.appendChild(defaultOption);
-    }
-}
-
-/**
- * รีเซ็ตสถานะของ select element
- */
-function resetSelectElement(selectElement, defaultText = 'Choose an option...') {
-    clearSelectOptions(selectElement);
-    addDefaultOption(selectElement, defaultText);
-}
-
-/**
- * ตรวจสอบว่า element มีอยู่หรือไม่
- */
-function elementExists(elementId) {
-    return document.getElementById(elementId) !== null;
-}
-
-/**
- * ดีบัก: แสดงข้อมูลใน console
- */
-function debugLog(message, data = null) {
-    if (console && console.log) {
-        if (data) {
-            console.log(message, data);
-        } else {
-            console.log(message);
-        }
-    }
-}
-
-/**
- * ดีบัก: แสดงข้อผิดพลาดใน console
- */
-function debugError(message, error = null) {
-    if (console && console.error) {
-        if (error) {
-            console.error(message, error);
-        } else {
-            console.error(message);
-        }
-    }
+/* แสดงข้อความแจ้งเตือนแบบ confirmation */
+async function showConfirmation(title, text, confirmText = 'ตกลง', cancelText = 'ยกเลิก') {
+    return await Swal.fire({
+        icon: 'question',
+        title: title,
+        text: text,
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280'
+    });
 }
 
 // ==================== VALIDATION FUNCTIONS ====================
@@ -1183,30 +1231,74 @@ function isValidDateRange(startDate, endDate) {
     return start <= end;
 }
 
-// ==================== EXPORT FOR TESTING ====================
-// หากต้องการทดสอบฟังก์ชันต่างๆ สามารถ export ได้
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        // Core functions
-        loadSkillsFromServer,
-        addSkill,
-        removeSkill,
-        addProjectSkill,
-        removeProjectSkill,
+/**
+ * ตรวจสอบว่า URL ถูกต้องหรือไม่
+ */
+function isValidURL(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
 
-        // Utility functions
-        isValidArray,
-        parseIntSafely,
-        findSkillById,
-        isSkillSelected,
+/**
+ * Sanitize input string
+ */
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return '';
+    return input.trim().replace(/[<>]/g, '');
+}
 
-        // Validation functions
-        isValidEmail,
-        isValidPhoneNumber,
-        isNotEmpty,
-        isValidLength,
-        isValidImageFile,
-        isValidDate,
-        isValidDateRange
-    };
+// ==================== DEBUG & HELPER FUNCTIONS ====================
+
+/**
+ * ดีบัก: แสดงข้อมูลใน console
+ */
+function debugLog(message, data = null) {
+    if (console && console.log) {
+        if (data) {
+            console.log(`[DEBUG] ${message}`, data);
+        } else {
+            console.log(`[DEBUG] ${message}`);
+        }
+    }
+}
+
+/**
+ * ดีบัก: แสดงข้อผิดพลาดใน console
+ */
+function debugError(message, error = null) {
+    if (console && console.error) {
+        if (error) {
+            console.error(`[ERROR] ${message}`, error);
+        } else {
+            console.error(`[ERROR] ${message}`);
+        }
+    }
+}
+
+/**
+ * รีเซ็ตฟอร์มทั้งหมด (สำหรับการทดสอบ)
+ */
+function resetForm() {
+    if (confirm('คุณต้องการรีเซ็ตฟอร์มทั้งหมดใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้')) {
+        document.getElementById('portfolioForm').reset();
+        selectedSkills = [];
+        projectSkills = {};
+        updateSkillsDisplay();
+        populateSkillsDropdown();
+        populateProjectSkillsDropdown();
+        
+        // ลบ items ที่เพิ่มเข้ามา (เหลือแค่ item แรก)
+        document.querySelectorAll('.work-item:not(:first-child)').forEach(item => item.remove());
+        document.querySelectorAll('.education-item:not(:first-child)').forEach(item => item.remove());
+        document.querySelectorAll('.project-item:not(:first-child)').forEach(item => item.remove());
+        
+        // รีเซ็ต counters
+        workExperienceCount = 1;
+        educationCount = 1;
+        projectCount = 1;
+    }
 }

@@ -215,12 +215,21 @@ section h5 {
     flex-direction: column;
 }
 
+
 .form-label {
     font-size: var(--font-size-sm);
     font-weight: 500;
     margin-bottom: var(--spacing-xs);
     color: var(--color-text-secondary);
 }
+
+.form-label.required::after {
+    content: " *";
+    color: red;
+    font-size: small;
+}
+
+
 
 .form-input,
 .form-select,
