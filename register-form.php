@@ -28,28 +28,28 @@
 
         <div class="grid grid-cols-2">
           <div class="form-group">
-            <label class="form-label">First Name *</label>
+            <label class="form-label required">First Name</label>
             <input type="text" name="firstName" class="form-input" required>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Last Name *</label>
+            <label class="form-label required">Last Name</label>
             <input type="text" name="lastName" class="form-input" required>
           </div>
 
           <div class="form-group col-span-2">
-            <label class="form-label">Professional Title *</label>
+            <label class="form-label required">Professional Title</label>
             <input type="text" name="position" class="form-input" placeholder="e.g., Full Stack Developer, UI/UX Designer" required>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" autocomplete="email" class="form-input">
+            <label class="form-label required">Email</label>
+            <input type="email" name="email" autocomplete="email" class="form-input" required>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Phone</label>
-            <input type="tel" name="phone" autocomplete="tel" class="form-input">
+            <label class="form-label required">Phone</label>
+            <input type="tel" name="phone" autocomplete="tel" class="form-input" required>
           </div>
 
 
@@ -64,7 +64,7 @@
           </div> -->
 
           <div class="form-group col-span-2">
-            <label class="form-label">Profile Picture</label>
+            <label class="form-label required">Profile Picture</label>
             <div class="image-uploader" id="myImageUploader">
               <div class="upload-placeholder">
                 <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@
           </div>
 
           <div class="form-group col-span-2">
-            <label class="form-label">Cover Image</label>
+            <label class="form-label required">Cover Image</label>
             <div class="image-uploader" id="coverImageUploader">
               <div class="upload-placeholder">
                 <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,8 +98,8 @@
         </div>
 
         <div class="form-group" style="margin-top: 16px;">
-          <label class="form-label">About Me</label>
-          <textarea name="introContent" class="form-textarea" rows="4" placeholder="Write a brief introduction about yourself..."></textarea>
+          <label class="form-label required">About Me</label>
+          <textarea name="introContent" class="form-textarea" rows="4" placeholder="Write a brief introduction about yourself..." required></textarea>
         </div>
       </section>
 
@@ -113,7 +113,7 @@
           <div class="selector">
             <div class="input-group">
               <div class="form-group">
-                <label class="form-label">Select Skill</label>
+                <label class="form-label required">Select Skill</label>
                 <select id="skillSelect" class="form-select">
                   <option value="">Choose a skill...</option>
                 </select>
@@ -157,18 +157,18 @@
 
             <div class="grid grid-cols-2">
               <div class="form-group">
-                <label class="form-label">Company Name *</label>
+                <label class="form-label required">Company Name</label>
                 <input type="text" name="workExperience[0][companyName]" class="form-input" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Position *</label>
+                <label class="form-label required">Position</label>
                 <input type="text" name="workExperience[0][position]" class="form-input" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Employment Type</label>
-                <select name="workExperience[0][employeeType]" class="form-select">
+                <label class="form-label required">Employment Type</label>
+                <select name="workExperience[0][employeeType]" class="form-select" required>
                   <option value="Full-time">Full-time</option>
                   <option value="Part-time">Part-time</option>
                   <option value="Contract">Contract</option>
@@ -180,23 +180,23 @@
               <div class="form-group">
                 <div class="grid grid-cols-2">
                   <div class="form-group">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" name="workExperience[0][startDate]" class="form-input">
+                    <label class="form-label required">Start Date </label>
+                    <input type="date" name="workExperience[0][startDate]" class="form-input" placeholder="Leave blank if current">
                   </div>
                   <div class="form-group">
-                    <label class="form-label">End Date</label>
-                    <input type="date" name="workExperience[0][endDate]" class="form-input">
+                    <label class="form-label required">End Date</label>
+                    <input type="date" name="workExperience[0][endDate]" class="form-input" placeholder="Leave blank if ongoing">
                   </div>
                 </div>
               </div>
 
               <div class="form-group col-span-2">
-                <label class="form-label">Job Description</label>
-                <textarea name="workExperience[0][positionDescription]" class="form-textarea" rows="3"></textarea>
+                <label class="form-label required">Job Description</label>
+                <textarea name="workExperience[0][positionDescription]" class="form-textarea" rows="3" required></textarea>
                 <ul id="description-list"></ul>
               </div>
               <div class="form-group col-span-2">
-                <label class="form-label">Remark</label>
+                <label class="form-labe ">Remark</label>
                 <textarea name="workExperience[0][workExperienceRemarks]" class="form-textarea" rows="3"></textarea>
               </div>
             </div>
@@ -224,34 +224,34 @@
 
             <div class="grid grid-cols-2">
               <div class="form-group">
-                <label class="form-label">Institution Name *</label>
+                <label class="form-label required">Institution Name</label>
                 <input type="text" name="education[0][educationName]" class="form-input" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Degree *</label>
+                <label class="form-label required">Degree</label>
                 <input type="text" name="education[0][degree]" class="form-input" placeholder="e.g., Bachelor's, Master's" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Faculty/School</label>
-                <input type="text" name="education[0][facultyName]" class="form-input">
+                <label class="form-label required">Faculty</label>
+                <input type="text" name="education[0][facultyName]" class="form-input" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Major/Field of Study</label>
-                <input type="text" name="education[0][majorName]" class="form-input">
+                <label class="form-label required">Major</label>
+                <input type="text" name="education[0][majorName]" class="form-input" required>
               </div>
 
               <div class="form-group col-span-2">
                 <div class="grid grid-cols-2">
                   <div class="form-group">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" name="education[0][startDate]" class="form-input">
+                    <label class="form-label required">Start Date</label>
+                    <input type="date" name="education[0][startDate]" class="form-input" required>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">End Date</label>
-                    <input type="date" name="education[0][endDate]" class="form-input">
+                    <label class="form-label required">End Date</label>
+                    <input type="date" name="education[0][endDate]" class="form-input" required>
                   </div>
                 </div>
               </div>
@@ -283,12 +283,12 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Project Title *</label>
+              <label class="form-label required">Project Title</label>
               <input type="text" name="projects[0][projectTitle]" class="form-input" required>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Project Image</label>
+              <label class="form-label required">Project Image</label>
               <div class="image-uploader" id="projectImageUploader_0">
                 <div class="upload-placeholder">
                   <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,8 +304,8 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Project Description</label>
-              <textarea name="projects[0][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..."></textarea>
+              <label class="form-label required">Project Description</label>
+              <textarea name="projects[0][keyPoint]" class="form-textarea" rows="3" placeholder="Describe the project, your role, and key achievements..." required></textarea>
             </div>
 
             <div class="skills">
@@ -314,8 +314,8 @@
               <div class="selector">
                 <div class="input-group">
                   <div class="form-group">
-                    <label class="form-label">Select Skill</label>
-                    <select class="form-select project-skill-select" name="project-skill-select" data-project="0">
+                    <label class="form-label required">Select Skill</label>
+                    <select class="form-select project-skill-select" data-project="0">
                       <option value="">Choose a skill...</option>
                     </select>
                   </div>

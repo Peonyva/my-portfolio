@@ -9,10 +9,84 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// ปรับปรุงให้รองรับ nullable dates
+function validateDateRange($startDate, $endDate, $fieldName = '')
+{
+    // อนุญาตให้ทั้งคู่เป็น null ได้
+    if (empty($startDate) && empty($endDate)) {
+        return; // ถ้าทั้งคู่ว่าง ถือว่าผ่าน
+    }
+
+    // ถ้ามี startDate แต่ไม่มี endDate (กรณี current job)
+    if (!empty($startDate) && empty($endDate)) {
+        if (!isValidDateFormat($startDate)) {
+            throw new Exception("รูปแบบวันที่เริ่มต้น{$fieldName}ไม่ถูกต้อง");
+        }
+        return;
+    }
+
+    // ตรวจสอบทั้งคู่
+    if (!empty($startDate) && !empty($endDate)) {
+        if (!isValidDateFormat($startDate)) {
+            throw new Exception("รูปแบบวันที่เริ่มต้น{$fieldName}ไม่ถูกต้อง");
+        }
+
+        if (!isValidDateFormat($endDate)) {
+            throw new Exception("รูปแบบวันที่สิ้นสุด{$fieldName}ไม่ถูกต้อง");
+        }
+
+        $start = new DateTime($startDate);
+        $end = new DateTime($endDate);
+
+        if ($start > $end) {
+            throw new Exception("วันที่เริ่มต้น{$fieldName}ต้องมาก่อนวันที่สิ้นสุด");
+        }
+    }
+}
+
+function isValidDateFormat($date, $format = 'Y-m-d')
+{
+    if (empty($date)) return true; // อนุญาตให้เป็นค่าว่างได้
+
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) === $date;
+}
+
+function validateRequiredImages()
+{
+    $requiredImages = ['myImage', 'coverImage'];
+
+    foreach ($requiredImages as $imageField) {
+        if (!isset($_FILES[$imageField]) || $_FILES[$imageField]['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception("กรุณาอัพโหลดรูปภาพ: " . ($imageField === 'myImage' ? 'รูปโปรไฟล์' : 'รูปปก'));
+        }
+    }
+
+    // ตรวจสอบ Project Images
+   if (isset($_POST['projects']) && is_array($_POST['projects'])) {
+        foreach ($_POST['projects'] as $index => $project) {
+            if (!empty($project['projectTitle'])) {
+                // ตรวจสอบโครงสร้าง $_FILES ให้ถูกต้อง
+                $hasProjectImage = isset($_FILES['projects']['error'][$index]['projectImage']) &&
+                    $_FILES['projects']['error'][$index]['projectImage'] === UPLOAD_ERR_OK;
+
+                if (!$hasProjectImage) {
+                    throw new Exception("กรุณาอัพโหลดรูปภาพสำหรับโปรเจค: " . htmlspecialchars($project['projectTitle']));
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
 try {
+    validateRequiredImages();
     $conn->beginTransaction();
 
-    // บันทึกข้อมูลส่วนตัวก่อน (ไม่มีรูปภาพ)
+    // Personal data
     $personalData = getPersonalInformation();
     $userId = insertPersonalData($conn, $personalData);
 
@@ -20,59 +94,61 @@ try {
         throw new Exception('Failed to insert personal data');
     }
 
-    // อัพเดทรูปภาพหลังจากได้ userId แล้ว
+    // Update images
     $imageUpdates = handleImageUploads($userId);
     if (!empty($imageUpdates)) {
         updatePersonalImages($conn, $userId, $imageUpdates);
     }
 
-    // บันทึกข้อมูลอื่นๆ
+    // Insert other data
     $skills = getSelectedSkills();
-    $workExperiences = getWorkExperiences();
-    $educations = getEducations();
-    $projects = getProjects($userId); // ส่ง userId เพื่ออัพโหลดรูป
-
     if (!empty($skills)) {
         insertUserSkills($conn, $userId, $skills);
     }
 
+    $workExperiences = getWorkExperiences();
     if (!empty($workExperiences)) {
         insertWorkExperiences($conn, $userId, $workExperiences);
     }
 
+    $educations = getEducations();
     if (!empty($educations)) {
         insertEducations($conn, $userId, $educations);
     }
 
+    $projects = getProjects($userId);
     if (!empty($projects)) {
         insertProjects($conn, $userId, $projects);
     }
 
     $conn->commit();
-
+    
+    http_response_code(200);
     echo json_encode([
         'success' => true,
-        'message' => 'Portfolio data saved successfully!',
-        'user_id' => $userId
+        'message' => 'Portfolio created successfully',
+        'userId' => $userId
     ]);
 
 } catch (Exception $e) {
     if ($conn->inTransaction()) {
         $conn->rollBack();
     }
-
-    error_log("Portfolio insert error: " . $e->getMessage());
+ error_log("Portfolio insert error: " . $e->getMessage());
 
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Failed to save portfolio data: ' . $e->getMessage()
+        'message' => $e->getMessage() // 
     ]);
 }
 
+   
+
 // ================== HELPER FUNCTIONS ==================
 
-function getPersonalInformation() {
+function getPersonalInformation()
+{
     return [
         'firstName' => sanitizeInput($_POST['firstName'] ?? ''),
         'lastName' => sanitizeInput($_POST['lastName'] ?? ''),
@@ -83,7 +159,8 @@ function getPersonalInformation() {
     ];
 }
 
-function handleImageUploads($userId) {
+function handleImageUploads($userId)
+{
     $images = [];
 
     if (isset($_FILES['myImage']) && $_FILES['myImage']['error'] === UPLOAD_ERR_OK) {
@@ -97,7 +174,8 @@ function handleImageUploads($userId) {
     return $images;
 }
 
-function updatePersonalImages($conn, $userId, $images) {
+function updatePersonalImages($conn, $userId, $images)
+{
     $updates = [];
     $params = [];
 
@@ -119,7 +197,8 @@ function updatePersonalImages($conn, $userId, $images) {
     }
 }
 
-function getSelectedSkills() {
+function getSelectedSkills()
+{
     $skillsString = $_POST['selectedSkills'] ?? '';
     if (empty($skillsString)) {
         return [];
@@ -128,7 +207,8 @@ function getSelectedSkills() {
     return array_map('intval', array_filter($skillsIDs));
 }
 
-function getWorkExperiences() {
+function getWorkExperiences()
+{
     if (!isset($_POST['workExperience']) || !is_array($_POST['workExperience'])) {
         return [];
     }
@@ -136,8 +216,19 @@ function getWorkExperiences() {
     $experiences = [];
     $sortBy = 1;
 
-    foreach ($_POST['workExperience'] as $experience) {
+    foreach ($_POST['workExperience'] as $index => $experience) {
         if (!empty($experience['companyName']) && !empty($experience['position'])) {
+            // ตรวจสอบ date range ก่อนเพิ่มลงใน array
+            try {
+                validateDateRange(
+                    $experience['startDate'] ?? '',
+                    $experience['endDate'] ?? '',
+                    "ของประสบการณ์การทำงานรายการที่ " . ($sortBy)
+                );
+            } catch (Exception $e) {
+                throw new Exception($e->getMessage());
+            }
+
             $experiences[] = [
                 'companyName' => sanitizeInput($experience['companyName']),
                 'position' => sanitizeInput($experience['position']),
@@ -154,7 +245,8 @@ function getWorkExperiences() {
     return $experiences;
 }
 
-function getEducations() {
+function getEducations()
+{
     if (!isset($_POST['education']) || !is_array($_POST['education'])) {
         return [];
     }
@@ -162,8 +254,19 @@ function getEducations() {
     $educations = [];
     $sortBy = 1;
 
-    foreach ($_POST['education'] as $education) {
+    foreach ($_POST['education'] as $index => $education) {
         if (!empty($education['educationName']) && !empty($education['degree'])) {
+            // ตรวจสอบ date range ก่อนเพิ่มลงใน array
+            try {
+                validateDateRange(
+                    $education['startDate'] ?? '',
+                    $education['endDate'] ?? '',
+                    "ของการศึกษารายการที่ " . ($sortBy)
+                );
+            } catch (Exception $e) {
+                throw new Exception($e->getMessage());
+            }
+
             $educations[] = [
                 'educationName' => sanitizeInput($education['educationName']),
                 'degree' => sanitizeInput($education['degree']),
@@ -180,7 +283,8 @@ function getEducations() {
     return $educations;
 }
 
-function getProjects($userId) {
+function getProjects($userId)
+{
     if (!isset($_POST['projects']) || !is_array($_POST['projects'])) {
         return [];
     }
@@ -223,7 +327,8 @@ function getProjects($userId) {
     return $projects;
 }
 
-function handleImageUpload($file, $userID, $type = 'general') {
+function handleImageUpload($file, $userID, $type = 'general')
+{
     if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
         return null;
     }
@@ -260,11 +365,13 @@ function handleImageUpload($file, $userID, $type = 'general') {
     return $uploadPath;
 }
 
-function sanitizeInput($input) {
+function sanitizeInput($input)
+{
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
 
-function insertPersonalData($conn, $data) {
+function insertPersonalData($conn, $data)
+{
     $sql = "INSERT INTO profile (
         firstName, lastName, position, email, phone, introContent
     ) VALUES (?, ?, ?, ?, ?, ?)";
@@ -282,7 +389,8 @@ function insertPersonalData($conn, $data) {
     return $conn->lastInsertId();
 }
 
-function insertUserSkills($conn, $userId, $skills) {
+function insertUserSkills($conn, $userId, $skills)
+{
     $sql = "INSERT INTO profileSkills (userID, skillsID) VALUES (?, ?)";
     $stmt = $conn->prepare($sql);
 
@@ -291,7 +399,8 @@ function insertUserSkills($conn, $userId, $skills) {
     }
 }
 
-function insertWorkExperiences($conn, $userId, $experiences) {
+function insertWorkExperiences($conn, $userId, $experiences)
+{
     $sql = "INSERT INTO workexperience (
         userID, companyName, position, positionDescription, 
         employeeType, startDate, endDate, sortBy, remarks
@@ -314,7 +423,8 @@ function insertWorkExperiences($conn, $userId, $experiences) {
     }
 }
 
-function insertEducations($conn, $userId, $educations) {
+function insertEducations($conn, $userId, $educations)
+{
     $sql = "INSERT INTO education (
         userID, educationName, degree, facultyName, 
         MajorName, startDate, endDate, sortBy, remarks
@@ -337,7 +447,8 @@ function insertEducations($conn, $userId, $educations) {
     }
 }
 
-function insertProjects($conn, $userId, $projects) {
+function insertProjects($conn, $userId, $projects)
+{
     $projectSql = "INSERT INTO project (
         userID, projectTitle, projectImage, keyPoint
     ) VALUES (?, ?, ?, ?)";
@@ -366,4 +477,3 @@ function insertProjects($conn, $userId, $projects) {
         }
     }
 }
-?>
