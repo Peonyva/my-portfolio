@@ -52,29 +52,43 @@
             <input type="tel" name="phone" autocomplete="tel" class="form-input" required>
           </div>
 
-
-          <!-- <div class="form-group">
-            <label class="form-label">Location</label>
-            <input type="text" name="location" class="form-input" placeholder="e.g., Bangkok, Thailand">
+          <div class="form-group">
+            <label class="form-label required">Facebook Name</label>
+            <input type="text" name="facebook" class="form-input" required>
           </div>
 
           <div class="form-group">
-            <label class="form-label">GitHub URL</label>
-            <input type="url" name="github" class="form-input" placeholder="https://github.com/username">
-          </div> -->
+            <label class="form-label required">Facebook Url</label>
+            <input type="text" name="facebookUrl" class="form-input" required>
+          </div>
 
+          <!-- Image Zone -->
           <div class="form-group col-span-2">
-            <label class="form-label required">Profile Picture</label>
-            <div class="image-uploader" id="myImageUploader">
+            <label class="form-label required">Logo Picture</label>
+            <div class="image-uploader" id="logoImageUploader">
               <div class="upload-placeholder">
                 <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                 </svg>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('myImage').click()">Upload Image</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('logoImage').click()">Upload Image</button>
                 <p>PNG, JPG, GIF up to 10MB</p>
               </div>
             </div>
-            <input type="file" id="myImage" name="myImage" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'myImageUploader')">
+            <input type="file" id="loImage" name="logoImage" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'logoUploader')">
+          </div>
+
+          <div class="form-group col-span-2">
+            <label class="form-label required">Profile Image</label>
+            <div class="image-uploader" id="profileImageUploader">
+              <div class="upload-placeholder">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('profileImage').click()">Upload Image</button>
+                <p>PNG, JPG, GIF up to 10MB</p>
+              </div>
+            </div>
+            <input type="file" id="profileImage" name="profileImage" class="file-input" accept="image/*" onchange="handleImageUpload(this, 'profileImageUploader')">
           </div>
 
           <div class="form-group col-span-2">

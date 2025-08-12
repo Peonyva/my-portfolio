@@ -9,10 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// ปรับปรุงให้รองรับ nullable dates
+/* Function */
+
 function validateDateRange($startDate, $endDate, $fieldName = '')
 {
-    // อนุญาตให้ทั้งคู่เป็น null ได้
+
     if (empty($startDate) && empty($endDate)) {
         return; // ถ้าทั้งคู่ว่าง ถือว่าผ่าน
     }
@@ -20,7 +21,7 @@ function validateDateRange($startDate, $endDate, $fieldName = '')
     // ถ้ามี startDate แต่ไม่มี endDate (กรณี current job)
     if (!empty($startDate) && empty($endDate)) {
         if (!isValidDateFormat($startDate)) {
-            throw new Exception("รูปแบบวันที่เริ่มต้น{$fieldName}ไม่ถูกต้อง");
+            throw new Exception("The start date format{$fieldName} is incorrect.");
         }
         return;
     }
@@ -28,21 +29,22 @@ function validateDateRange($startDate, $endDate, $fieldName = '')
     // ตรวจสอบทั้งคู่
     if (!empty($startDate) && !empty($endDate)) {
         if (!isValidDateFormat($startDate)) {
-            throw new Exception("รูปแบบวันที่เริ่มต้น{$fieldName}ไม่ถูกต้อง");
-        }
-
-        if (!isValidDateFormat($endDate)) {
-            throw new Exception("รูปแบบวันที่สิ้นสุด{$fieldName}ไม่ถูกต้อง");
-        }
-
-        $start = new DateTime($startDate);
-        $end = new DateTime($endDate);
-
-        if ($start > $end) {
-            throw new Exception("วันที่เริ่มต้น{$fieldName}ต้องมาก่อนวันที่สิ้นสุด");
+            throw new Exception("The start date format{$fieldName} is incorrect.");
         }
     }
+
+    if (!isValidDateFormat($endDate)) {
+        throw new Exception("The end date format{$fieldName} is incorrect.");
+    }
 }
+
+$start = new DateTime($startDate);
+$end = new DateTime($endDate);
+
+if ($start > $end) {
+    throw new Exception("วันที่เริ่มต้น{$fieldName}ต้องมาก่อนวันที่สิ้นสุด");
+}
+
 
 function isValidDateFormat($date, $format = 'Y-m-d')
 {
@@ -54,32 +56,38 @@ function isValidDateFormat($date, $format = 'Y-m-d')
 
 function validateRequiredImages()
 {
-    $requiredImages = ['myImage', 'coverImage'];
+    $requiredImages = ['logoImage', 'profileImage', 'coverImage'];
 
     foreach ($requiredImages as $imageField) {
         if (!isset($_FILES[$imageField]) || $_FILES[$imageField]['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception("กรุณาอัพโหลดรูปภาพ: " . ($imageField === 'myImage' ? 'รูปโปรไฟล์' : 'รูปปก'));
-        }
-    }
-
-    // ตรวจสอบ Project Images
-   if (isset($_POST['projects']) && is_array($_POST['projects'])) {
-        foreach ($_POST['projects'] as $index => $project) {
-            if (!empty($project['projectTitle'])) {
-                // ตรวจสอบโครงสร้าง $_FILES ให้ถูกต้อง
-                $hasProjectImage = isset($_FILES['projects']['error'][$index]['projectImage']) &&
-                    $_FILES['projects']['error'][$index]['projectImage'] === UPLOAD_ERR_OK;
-
-                if (!$hasProjectImage) {
-                    throw new Exception("กรุณาอัพโหลดรูปภาพสำหรับโปรเจค: " . htmlspecialchars($project['projectTitle']));
-                }
+            $errorMessage = '';
+            switch ($imageField) {
+                case 'logoImage':
+                    $errorMessage = 'Please Upload your Logo Image';
+                    break;
+                case 'profileImage':
+                    $errorMessage = 'Please Upload your Profile Image';
+                    break;
+                case 'coverImage':
+                    $errorMessage = 'Please Upload your Cover Image';
+                    break;
             }
+            throw new Exception($errorMessage);
         }
     }
 }
 
-
-
+// ตรวจสอบ Project Images
+if (isset($_POST['projects']) && is_array($_POST['projects'])) {
+    foreach ($_POST['projects'] as $index => $project) {
+        if (!empty($project['projectTitle'])) {
+            // ตรวจสอบว่ามีการอัปโหลดไฟล์สำหรับโปรเจกต์นี้หรือไม่ และไม่มีข้อผิดพลาด
+            if (!isset($_FILES['projects']['name'][$index]['projectImage']) || $_FILES['projects']['error'][$index]['projectImage'] !== UPLOAD_ERR_OK) {
+                throw new Exception("กรุณาอัปโหลดรูปภาพสำหรับโปรเจกต์: " . htmlspecialchars($project['projectTitle']));
+            }
+        }
+    }
+}
 
 
 try {
@@ -122,19 +130,18 @@ try {
     }
 
     $conn->commit();
-    
+
     http_response_code(200);
     echo json_encode([
         'success' => true,
         'message' => 'Portfolio created successfully',
         'userId' => $userId
     ]);
-
 } catch (Exception $e) {
     if ($conn->inTransaction()) {
         $conn->rollBack();
     }
- error_log("Portfolio insert error: " . $e->getMessage());
+    error_log("Portfolio insert error: " . $e->getMessage());
 
     http_response_code(500);
     echo json_encode([
@@ -143,7 +150,7 @@ try {
     ]);
 }
 
-   
+
 
 // ================== HELPER FUNCTIONS ==================
 
@@ -163,8 +170,8 @@ function handleImageUploads($userId)
 {
     $images = [];
 
-    if (isset($_FILES['myImage']) && $_FILES['myImage']['error'] === UPLOAD_ERR_OK) {
-        $images['myImage'] = handleImageUpload($_FILES['myImage'], $userId, 'profile');
+    if (isset($_FILES['profileImage']) && $_FILES['profileImage']['error'] === UPLOAD_ERR_OK) {
+        $images['profileImage'] = handleImageUpload($_FILES['profileImage'], $userId, 'profile');
     }
 
     if (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] === UPLOAD_ERR_OK) {
@@ -179,9 +186,9 @@ function updatePersonalImages($conn, $userId, $images)
     $updates = [];
     $params = [];
 
-    if (isset($images['myImage'])) {
-        $updates[] = "myImage = ?";
-        $params[] = $images['myImage'];
+    if (isset($images['profileImage'])) {
+        $updates[] = "profileImage = ?";
+        $params[] = $images['profileImage'];
     }
 
     if (isset($images['coverImage'])) {
