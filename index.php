@@ -7,7 +7,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Portfolio</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="https://kit.fontawesome.com/92f0aafca7.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="styles/index.css" />
 </head>
 
